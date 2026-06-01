@@ -17,11 +17,8 @@
   h1 { font-size: 22px; font-weight: 500; color: #c4b5fd; margin-bottom: 6px; }
   .subtitle { font-size: 14px; color: #888; margin-bottom: 28px; }
   .card {
-    background: #1a1a2e;
-    border: 0.5px solid #2a2a4a;
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
+    background: #1a1a2e; border: 0.5px solid #2a2a4a;
+    border-radius: 16px; padding: 20px; margin-bottom: 16px;
   }
   .card-title {
     font-size: 13px; color: #888; margin-bottom: 16px;
@@ -37,9 +34,7 @@
     padding: 14px; resize: none; direction: rtl; line-height: 1.6;
   }
   textarea:focus { outline: none; border-color: #7c3aed; }
-  .param-row {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
-  }
+  .param-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
   .param-row:last-child { margin-bottom: 0; }
   .param-label { font-size: 14px; color: #ccc; min-width: 130px; }
   .param-label span { display: block; font-size: 11px; color: #666; margin-top: 2px; }
@@ -49,14 +44,11 @@
     flex: 1; -webkit-appearance: none; height: 4px;
     border-radius: 2px; background: #2a2a4a; outline: none;
   }
-  input[type=range].pitch-slider::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 20px; height: 20px;
-    border-radius: 50%; background: #d946ef; cursor: pointer; border: 2px solid #0f0f1a;
-  }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; width: 20px; height: 20px;
     border-radius: 50%; background: #7c3aed; cursor: pointer; border: 2px solid #0f0f1a;
   }
+  input[type=range].pitch-slider::-webkit-slider-thumb { background: #d946ef; }
   .param-value {
     font-size: 15px; font-weight: 500; color: #c4b5fd; min-width: 44px;
     text-align: center; background: #0f0f1a; border: 0.5px solid #2a2a4a;
@@ -71,7 +63,6 @@
   }
   .btn-speak:active { transform: scale(0.98); }
   .btn-speak:disabled { background: #3a2a6e; color: #888; cursor: not-allowed; }
-  .btn-speak.loading { background: #5b21b6; }
   .status { font-size: 13px; color: #888; text-align: center; min-height: 20px; margin-bottom: 16px; }
   .status.error { color: #f87171; }
   .status.success { color: #34d399; }
@@ -82,6 +73,12 @@
     border-radius: 20px; color: #c4b5fd; font-size: 13px; cursor: pointer;
   }
   .preset-btn:active { background: #2a2a4e; }
+  .debug-box {
+    background: #0a0a14; border: 0.5px solid #2a2a4a; border-radius: 10px;
+    padding: 14px; font-family: 'Courier New', monospace; font-size: 12px;
+    color: #fbbf24; direction: ltr; white-space: pre-wrap; overflow-x: auto;
+    max-height: 300px; overflow-y: auto;
+  }
   .code-block {
     background: #0a0a14; border: 0.5px solid #2a2a4a; border-radius: 10px;
     padding: 14px; font-family: 'Courier New', monospace; font-size: 13px;
@@ -92,7 +89,13 @@
     border: 0.5px solid #3a3a5e; border-radius: 8px; color: #c4b5fd;
     font-size: 13px; cursor: pointer; text-align: center;
   }
-  .copy-btn:active { background: #2a2a4e; }
+  .server-input {
+    width: 100%; background: #0f0f1a; border: 0.5px solid #2a2a4a;
+    border-radius: 8px; color: #e8e4ff; font-size: 13px;
+    padding: 10px 12px; direction: ltr;
+  }
+  .server-input:focus { outline: none; border-color: #7c3aed; }
+  .pitch-zero { color: #555; font-size: 11px; text-align: center; margin-top: -12px; margin-bottom: 12px; }
   .history-list { list-style: none; }
   .history-item {
     display: flex; align-items: center; justify-content: space-between;
@@ -104,13 +107,6 @@
     padding: 4px 12px; background: transparent; border: 0.5px solid #3a3a5e;
     border-radius: 8px; color: #c4b5fd; font-size: 12px; cursor: pointer;
   }
-  .server-input {
-    width: 100%; background: #0f0f1a; border: 0.5px solid #2a2a4a;
-    border-radius: 8px; color: #e8e4ff; font-size: 13px;
-    padding: 10px 12px; direction: ltr;
-  }
-  .server-input:focus { outline: none; border-color: #7c3aed; }
-  .pitch-zero { color: #555; font-size: 11px; text-align: center; margin-top: -12px; margin-bottom: 12px; }
 </style>
 </head>
 <body>
@@ -143,60 +139,43 @@
 
 <div class="card">
   <div class="card-title">פרמטרים</div>
-
   <div class="section-divider">קצב ובהירות</div>
-
   <div class="param-row">
-    <div class="param-label">
-      length_scale
-      <span>מהירות — גבוה = איטי</span>
-    </div>
+    <div class="param-label">length_scale<span>מהירות — גבוה = איטי</span></div>
     <input type="range" id="lengthScale" min="0.8" max="2.5" step="0.05" value="1.55"
       oninput="document.getElementById('lengthVal').textContent=parseFloat(this.value).toFixed(2);updateCode()" />
     <div class="param-value" id="lengthVal">1.55</div>
   </div>
-
   <div class="param-row">
-    <div class="param-label">
-      noise_scale
-      <span>רעש — נמוך = נקי</span>
-    </div>
+    <div class="param-label">noise_scale<span>רעש — נמוך = נקי</span></div>
     <input type="range" id="noiseScale" min="0.01" max="1.0" step="0.01" value="0.10"
       oninput="document.getElementById('noiseVal').textContent=parseFloat(this.value).toFixed(2);updateCode()" />
     <div class="param-value" id="noiseVal">0.10</div>
   </div>
-
   <div class="param-row">
-    <div class="param-label">
-      noise_w
-      <span>וריאציה — נמוך = עקבי</span>
-    </div>
+    <div class="param-label">noise_w<span>וריאציה — נמוך = עקבי</span></div>
     <input type="range" id="noiseW" min="0.01" max="1.0" step="0.01" value="0.20"
       oninput="document.getElementById('noiseWVal').textContent=parseFloat(this.value).toFixed(2);updateCode()" />
     <div class="param-value" id="noiseWVal">0.20</div>
   </div>
-
   <div class="section-divider">סגנון קול</div>
-
   <div class="param-row">
-    <div class="param-label highlight">
-      pitch_shift
-      <span>גובה — + = ילדותי</span>
-    </div>
+    <div class="param-label highlight">pitch_shift<span>גובה — + = ילדותי</span></div>
     <input type="range" class="pitch-slider" id="pitchShift" min="-6" max="6" step="0.5" value="0"
       oninput="updatePitchDisplay();updateCode()" />
     <div class="param-value pitch-val" id="pitchVal">0</div>
   </div>
   <div class="pitch-zero" id="pitchDesc">ללא שינוי</div>
-
 </div>
 
-<button class="btn-speak" id="speakBtn" onclick="speak()">
-  ▶ השמע
-</button>
-
+<button class="btn-speak" id="speakBtn" onclick="speak()">▶ השמע</button>
 <div class="status" id="status"></div>
 <audio id="audioPlayer" controls style="display:none;"></audio>
+
+<div class="card">
+  <div class="card-title">דיבאג — בקשה ותשובה</div>
+  <div class="debug-box" id="debugBox">לחץ השמע כדי לראות...</div>
+</div>
 
 <div class="card">
   <div class="card-title">קוד Python לעדכון</div>
@@ -214,6 +193,7 @@
 <script>
 function getParams() {
   return {
+    text: document.getElementById('testText').value.trim(),
     length_scale: parseFloat(document.getElementById('lengthScale').value),
     noise_scale:  parseFloat(document.getElementById('noiseScale').value),
     noise_w:      parseFloat(document.getElementById('noiseW').value),
@@ -236,7 +216,6 @@ function updatePitchDisplay() {
 
 function updateCode() {
   const p = getParams();
-  const pitchLine = p.pitch_shift !== 0 ? `\n    pitch_shift=${p.pitch_shift.toFixed(1)},` : '';
   document.getElementById('codeBlock').textContent =
 `samples, sample_rate = piper_model.create(
     phonemes,
@@ -267,41 +246,71 @@ function applyPreset(ls, ns, nw, pitch) {
   updateCode();
 }
 
+function log(msg) {
+  const box = document.getElementById('debugBox');
+  box.textContent += '\n' + msg;
+  box.scrollTop = box.scrollHeight;
+}
+
 async function speak() {
-  const text = document.getElementById('testText').value.trim();
-  if (!text) return;
-  const url = document.getElementById('serverUrl').value.trim();
   const p = getParams();
+  if (!p.text) return;
+  const url = document.getElementById('serverUrl').value.trim();
   const btn = document.getElementById('speakBtn');
   const status = document.getElementById('status');
   const player = document.getElementById('audioPlayer');
+  const debugBox = document.getElementById('debugBox');
 
   btn.disabled = true;
-  btn.classList.add('loading');
   btn.textContent = '⏳ מסנתז...';
-  status.textContent = 'שולח בקשה לשרת...';
+  status.textContent = 'שולח בקשה...';
   status.className = 'status';
+  debugBox.textContent = '';
+
+  const body = JSON.stringify(p);
+  log('URL: ' + url);
+  log('BODY: ' + body);
 
   try {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(p)
+      body
     });
-    if (!res.ok) throw new Error(`שגיאת שרת: ${res.status}`);
+
+    log('STATUS: ' + res.status + ' ' + res.statusText);
+    log('CONTENT-TYPE: ' + res.headers.get('content-type'));
+
+    if (!res.ok) {
+      const errText = await res.text();
+      log('ERROR BODY: ' + errText);
+      throw new Error(`שגיאת שרת: ${res.status} — ${errText}`);
+    }
+
     const blob = await res.blob();
+    log('BLOB SIZE: ' + blob.size + ' bytes');
+    log('BLOB TYPE: ' + blob.type);
+
+    if (blob.size < 100) {
+      const txt = await blob.text();
+      log('BLOB CONTENT: ' + txt);
+      throw new Error('תשובה ריקה מהשרת');
+    }
+
     player.src = URL.createObjectURL(blob);
     player.style.display = 'block';
     player.play();
     status.textContent = '✓ הצליח';
     status.className = 'status success';
-    addHistory(text, p);
+    log('✅ הצליח!');
+    addHistory(p.text, p);
+
   } catch (err) {
     status.textContent = '✗ ' + err.message;
     status.className = 'status error';
+    log('❌ ' + err.message);
   } finally {
     btn.disabled = false;
-    btn.classList.remove('loading');
     btn.innerHTML = '▶ השמע';
   }
 }
