@@ -18,15 +18,13 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Phonikud TTS API", version="1.0.0")
 
-# CORS — מאפשר לאפליקציה PWA לקרוא לשרת
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # בפרודקשן — שנה לדומיין שלך
+    allow_origins=["*"],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
-# ── טעינת מודלים בהפעלה ──────────────────────────────
 phonikud_model = None
 piper_model    = None
 
@@ -38,7 +36,16 @@ PIPER_CONFIG   = os.getenv("PIPER_CONFIG",   "model.config.json")
 async def load_models():
     global phonikud_model, piper_model
     try:
-        from phonikud_tts import Phonikud, Piper
+        import sys
+        # הוסף את site-packages של venv לpath
+        import site
+        for sp in site.getsitepackages():
+            if sp not in sys.path:
+                sys.path.insert(0, sp)
+
+        from phonikud_onnx import Phonikud
+        from piper_onnx import Piper
+
         logger.info("טוען מודל Phonikud...")
         phonikud_model = Phonikud(PHONIKUD_MODEL)
         logger.info("טוען מודל Piper...")
@@ -49,13 +56,10 @@ async def load_models():
         raise
 
 
-# ── Schema ───────────────────────────────────────────
 class TTSRequest(BaseModel):
-    text: str           # טקסט עברי (עם ניקוד או בלי)
-    format: str = "wav" # wav / mp3
+    text: str
+    format: str = "wav"
 
-
-# ── Routes ───────────────────────────────────────────
 
 @app.get("/")
 def root():
@@ -72,12 +76,6 @@ def health():
 
 @app.post("/speak")
 async def speak(req: TTSRequest):
-    """
-    קבל טקסט עברי — החזר אודיו WAV
-    
-    Body: { "text": "שלום עולם" }
-    Response: audio/wav binary
-    """
     if not phonikud_model or not piper_model:
         raise HTTPException(status_code=503, detail="מודלים לא נטענו עדיין")
 
@@ -85,19 +83,16 @@ async def speak(req: TTSRequest):
     if not text:
         raise HTTPException(status_code=400, detail="טקסט ריק")
     if len(text) > 500:
-        raise HTTPException(status_code=400, detail="טקסט ארוך מדי (מקסימום 500 תווים)")
+        raise HTTPException(status_code=400, detail="טקסט ארוך מדי")
 
     try:
-        from phonikud_tts import phonemize
+        from phonikud import phonemize as ph_phonemize
 
-        # שלב 1 — ניקוד + המרה ל-IPA
-        phonemes = phonemize(phonikud_model, text)
+        phonemes = ph_phonemize(phonikud_model, text)
         logger.info(f"📝 '{text}' → {phonemes}")
 
-        # שלב 2 — סינתזת קול
         audio_data = piper_model.synthesize(phonemes)
 
-        # שלב 3 — המרה ל-WAV
         buffer = io.BytesIO()
         sf.write(buffer, np.array(audio_data), samplerate=22050, format="WAV")
         buffer.seek(0)
@@ -115,16 +110,12 @@ async def speak(req: TTSRequest):
 
 @app.post("/nikud")
 async def nikud_only(req: TTSRequest):
-    """
-    רק ניקוד — מחזיר טקסט מנוקד בלי אודיו
-    Body: { "text": "שלום עולם" }
-    """
     if not phonikud_model:
         raise HTTPException(status_code=503, detail="מודל לא נטען")
 
     try:
-        from phonikud_tts import phonemize
-        phonemes = phonemize(phonikud_model, req.text.strip())
+        from phonikud import phonemize as ph_phonemize
+        phonemes = ph_phonemize(phonikud_model, req.text.strip())
         return {"text": req.text, "phonemes": phonemes}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
